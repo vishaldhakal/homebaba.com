@@ -1,10 +1,21 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
+from unfold.admin import TabularInline
 from .models import (
     Country, City, PropertyType, PropertyStatus, 
     Amenity, Tag, Property, PropertyImage, 
     PropertyAmenity, PropertyTag
 )
+from django import forms
+from tinymce.widgets import TinyMCE
+
+class PropertyForm(forms.ModelForm):
+    class Meta:
+        model = Property
+        fields = '__all__'
+        widgets = {
+            'description': TinyMCE(),
+        }
 
 @admin.register(Country)
 class CountryAdmin(ModelAdmin):
@@ -60,24 +71,25 @@ class TagAdmin(ModelAdmin):
     list_per_page = 20
 
 
-class PropertyImageInline(admin.TabularInline):
+class PropertyImageInline(TabularInline):
     model = PropertyImage
     extra = 1
     fields = ('image', 'caption', 'is_primary', 'order')
 
 
-class PropertyAmenityInline(admin.TabularInline):
+class PropertyAmenityInline(TabularInline):
     model = PropertyAmenity
     extra = 1
 
 
-class PropertyTagInline(admin.TabularInline):
+class PropertyTagInline(TabularInline):
     model = PropertyTag
     extra = 1
 
 
 @admin.register(Property)
 class PropertyAdmin(ModelAdmin):
+    form = PropertyForm
     list_display = ('title', 'country', 'city', 'property_type', 'status', 'price', 'currency', 'is_active', 'is_featured', 'created_at')
     list_filter = ('is_active', 'is_featured', 'is_verified', 'property_type', 'status', 'country', 'city')
     search_fields = ('title', 'description', 'address', 'country__name', 'city__name')
